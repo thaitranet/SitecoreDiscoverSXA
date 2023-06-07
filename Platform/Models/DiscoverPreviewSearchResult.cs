@@ -1,6 +1,6 @@
 ﻿using Sitecore.XA.Feature.Search.Models;
 
-namespace Platform.Pipelines
+namespace Platform.Models
 {
     public class DiscoverPreviewSearchResult : Result
     {

@@ -126,11 +126,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Pipelines\DiscoverPreviewSearchRequest.cs" />
-    <Compile Include="Pipelines\DiscoverPreviewSearchResponse.cs" />
-    <Compile Include="Pipelines\DiscoverPreviewSearchResult.cs" />
+    <Compile Include="Models\DiscoverPreviewSearchRequest.cs" />
+    <Compile Include="Models\DiscoverPreviewSearchResponse.cs" />
+    <Compile Include="Models\DiscoverPreviewSearchResult.cs" />
     <Compile Include="Pipelines\RegisterRoutes.cs" />
-    <Compile Include="Pipelines\XASearchOverrideController.cs" />
+    <Compile Include="Controllers\XASearchOverrideController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

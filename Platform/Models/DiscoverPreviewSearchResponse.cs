@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Platform.Pipelines
+namespace Platform.Models
 {
     public class Content
     {

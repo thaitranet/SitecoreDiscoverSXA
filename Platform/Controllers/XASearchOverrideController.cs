@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Platform.Models;
 using Sitecore.XA.Feature.Search.Attributes;
 using Sitecore.XA.Feature.Search.Binder;
 using Sitecore.XA.Feature.Search.Controllers;
@@ -11,7 +12,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http.ModelBinding;
 
-namespace Platform.Pipelines
+namespace Platform.Controllers
 {
     [JsonFormatter]
     public class XASearchOverrideController : SearchController
@@ -23,11 +24,11 @@ namespace Platform.Pipelines
         [CacheWebApi]
         public async Task<ResultSet> GetResultsOverride([ModelBinder(BinderType = typeof(QueryModelBinder))] QueryModel model)
         {
-            var searchResults = base.GetResults(model);
+            var searchResults = GetResults(model);
             var discoverSearchResults = await PerformDiscoverPreviewSearch(model);
-            if(discoverSearchResults != null)
+            if (discoverSearchResults != null)
             {
-                searchResults.Results = Enumerable.Concat(discoverSearchResults, searchResults.Results);
+                searchResults.Results = discoverSearchResults.Concat(searchResults.Results);
             }
             return searchResults;
         }
@@ -35,7 +36,7 @@ namespace Platform.Pipelines
         public async Task<IEnumerable<DiscoverPreviewSearchResult>> PerformDiscoverPreviewSearch(QueryModel model)
         {
             var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api-apse2.rfksrv.com/search-rec/{DISCOVER_DOMAIN_ID}/3");            
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api-apse2.rfksrv.com/search-rec/{DISCOVER_DOMAIN_ID}/3");
             request.Headers.Add("authorization", DISCOVER_AUTHORIZATION_KEY);
 
             var parameters = new DiscoverPreviewSearchRequest
@@ -72,7 +73,7 @@ namespace Platform.Pipelines
             request.Content = content;
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            
+
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
             var result = JsonConvert.DeserializeObject<DiscoverPreviewSearchResponse>(jsonResponse);
@@ -80,11 +81,12 @@ namespace Platform.Pipelines
 
             if (result?.content?.product?.value != null)
             {
-                return result.content.product.value.Select(delegate (Value item) {
+                return result.content.product.value.Select(delegate (Value item)
+                {
                     return new DiscoverPreviewSearchResult
                     {
                         Name = item.name,
-                        Url = item.product_url,                        
+                        Url = item.product_url,
                         Image = item.image_url,
                         Html = $"\r\n<div class=\"product-summary\" data-id=\"7042142\">\r\n    \r\n    \r\n    <div class=\"product-photo\">\r\n        \r\n        <a title=\"Optix USB Smart Card Reader\" href=\"/Catalogs/Habitat_Master/Habitat_Master-Departments/Habitat_Master-Cameras/7042142\">\r\n            <img src=\"https://placehold.co/220\" alt=\"\" />\r\n            \r\n            <div data-bind=\"css: {{ 'promotion': promotion }}\"\r\n                class=\"hidden \">\r\n                \r\n                <span data-bind=\"text: promotion\" class=\"savings-percentage\">0%</span>\r\n                <span class=\"savings-label\">off</span>\r\n            </div>\r\n        </a>\r\n    </div>\r\n    \r\n    <div class=\"product-info\">\r\n        \r\n        <a class=\"product-title\" title=\"Optix USB Smart Card Reader\" href=\"/Catalogs/Habitat_Master/Habitat_Master-Departments/Habitat_Master-Cameras/7042142\">\r\n            {item.id}\r\n        </a>\r\n        <div class=\"product-brand\">\r\n            Sitecore Discover\r\n        </div>\r\n        \r\n        <div class=\"product-indicator\">\r\n            \r\n            <label class=\"hidden  \"\r\n                data-bind=\"css: {{ 'price-difference': hasDifferentPrice }}\">\r\n                Starting from\r\n            </label>\r\n            <label class=\"stock-status\" data-bind=\"text: stockLabel\">In-Stock</label>\r\n        </div>\r\n        \r\n        <div class=\"product-detail \"\r\n            data-bind=\"css: {{ 'on-sale': promotion }}\">\r\n            \r\n            <span data-bind=\"text: price\" class=\"product-price\">30.79 USD</span>\r\n            <a class=\"product-link\" title=\"Optix USB Smart Card Reader\" href=\"/Catalogs/Habitat_Master/Habitat_Master-Departments/Habitat_Master-Cameras/7042142\">\r\n                Details\r\n            </a>\r\n        </div>\r\n    </div>\r\n</div>\r\n"
                     };
